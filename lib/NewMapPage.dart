@@ -1,68 +1,91 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'UserState.dart';
+import 'LoginCheck.dart';
 import 'MapListPage.dart';
 
 class NewMapPage extends StatefulWidget {
-  const NewMapPage(this.user);
-  final User user;
+  const NewMapPage({Key? key}) : super(key: key);
 
   @override
   NewMapPageState createState() => NewMapPageState();
 }
 
 class NewMapPageState extends State<NewMapPage> {
-  String testTitle = "";
+  String mapTitle = "";
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("新規地図"),
-      ),
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(32),
+    final UserState userState = Provider.of<UserState>(context, listen: false);
+    if (userState.user == null) {
+      return Scaffold(
+        body: Center(
           child: Column(
-            children: <Widget>[
-              Text("${widget.user.email}"),
-              TextFormField(
-                decoration: const InputDecoration(labelText: "タイトル"),
-                onChanged: (String value) {
-                  setState(() {
-                    testTitle = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  child: const Text('作成'),
-                  onPressed: () async {
-                    final date =
-                        DateTime.now().toLocal().toIso8601String(); // 現在の日時
-                    await FirebaseFirestore.instance
-                        .collection('maps')
-                        .doc() // ドキュメントID自動生成
-                        .set({
-                      'author': widget.user.email,
-                      'title': testTitle,
-                      'date': date
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                OutlinedButton(
+                    onPressed: () => {
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (context) {
+                            return const LoginCheck(
+                                nextPage: MapListPage.routeName);
+                          }))
+                        },
+                    child: const Text("ログイン", style: TextStyle(fontSize: 40)))
+              ]),
+        ),
+      );
+    } else {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text("新規地図"),
+        ),
+        body: Center(
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              children: <Widget>[
+                Text("${userState.user?.email}"),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: "タイトル"),
+                  onChanged: (String value) {
+                    setState(() {
+                      mapTitle = value;
                     });
-                    if (!mounted) return;
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) {
-                        return MapListPage();
-                      }),
-                    );
                   },
                 ),
-              )
-            ],
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    child: const Text('作成'),
+                    onPressed: () async {
+                      final date =
+                          DateTime.now().toLocal().toIso8601String(); // 現在の日時
+                      await FirebaseFirestore.instance
+                          .collection('maps')
+                          .doc() // ドキュメントID自動生成
+                          .set({
+                        'author': userState.user?.email,
+                        'title': mapTitle,
+                        'date': date
+                      });
+                      if (!mounted) return;
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) {
+                          return const MapListPage();
+                        }),
+                      );
+                    },
+                  ),
+                )
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 }

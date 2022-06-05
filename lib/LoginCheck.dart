@@ -1,11 +1,12 @@
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'UserState.dart';
 import 'LoginPage.dart';
 
 class LoginCheck extends StatefulWidget {
-  LoginCheck({Key? key, required this.nextPage}) : super(key: key);
+  const LoginCheck({Key? key, required this.nextPage}) : super(key: key);
   final String nextPage;
 
   @override
@@ -33,11 +34,9 @@ class LoginCheckState extends State<LoginCheck> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
-        child: Container(
-          child: Text("Loading..."),
-        ),
+        child: Text("Loading..."),
       ),
     );
   }

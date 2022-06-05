@@ -1,6 +1,7 @@
-import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+
 import 'UserState.dart';
 import 'NewMapPage.dart';
 import 'MapDetailPage.dart';
@@ -8,6 +9,8 @@ import 'LoginCheck.dart';
 
 class MapListPage extends StatefulWidget {
   static const routeName = '/maps';
+
+  const MapListPage({Key? key}) : super(key: key);
   @override
   MapListPageState createState() => MapListPageState();
 }
@@ -16,7 +19,25 @@ class MapListPageState extends State<MapListPage> {
   @override
   Widget build(BuildContext context) {
     final UserState userState = Provider.of<UserState>(context, listen: false);
-    if (userState.user != null) {
+    if (userState.user == null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                OutlinedButton(
+                    onPressed: () => {
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (context) {
+                            return const LoginCheck(
+                                nextPage: MapListPage.routeName);
+                          }))
+                        },
+                    child: const Text("ログイン", style: TextStyle(fontSize: 40)))
+              ]),
+        ),
+      );
+    } else {
       return Scaffold(
         appBar: AppBar(
           title: const Text("地図一覧"),
@@ -32,7 +53,7 @@ class MapListPageState extends State<MapListPage> {
                     onPressed: () => {
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (context) {
-                          return NewMapPage(userState.user!);
+                          return const NewMapPage();
                         }),
                       ),
                     },
@@ -60,11 +81,11 @@ class MapListPageState extends State<MapListPage> {
                             trailing: IconButton(
                               icon: const Icon(Icons.arrow_right),
                               onPressed: () {
-                                // Navigator.of(context).push(
-                                //   MaterialPageRoute(builder: (context) {
-                                //     return MapDetailPage(document.id);
-                                //   }),
-                                // );
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (context) {
+                                    return MapDetailPage(document.id);
+                                  }),
+                                );
                               },
                             ),
                           ),
@@ -79,23 +100,6 @@ class MapListPageState extends State<MapListPage> {
               ),
             )
           ],
-        ),
-      );
-    } else {
-      return Scaffold(
-        body: Center(
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                OutlinedButton(
-                    onPressed: () => {
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (context) {
-                            return LoginCheck(nextPage: MapListPage.routeName);
-                          }))
-                        },
-                    child: const Text("ログイン", style: TextStyle(fontSize: 40)))
-              ]),
         ),
       );
     }
