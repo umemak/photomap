@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:webviewx/webviewx.dart';
 
+import 'NewPostPage.dart';
 import 'UserState.dart';
 
 class MapDetailPage extends StatefulWidget {
@@ -152,13 +153,13 @@ class MapDetailPageState extends State<MapDetailPage> {
                           width: double.infinity,
                           child: ElevatedButton.icon(
                             icon: const Icon(Icons.edit),
-                            label: const Text('編集'),
+                            label: const Text('投稿'),
                             onPressed: () {
-                              // Navigator.of(context).push(
-                              //   MaterialPageRoute(builder: (context) {
-                              //     return EditTestPage(widget.id);
-                              //   }),
-                              // );
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (context) {
+                                  return NewPostPage(widget.id);
+                                }),
+                              );
                             },
                           ),
                         ),
