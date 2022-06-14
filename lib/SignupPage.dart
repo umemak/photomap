@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-import 'LoginPage.dart';
+import 'package:go_router/go_router.dart';
 
 class SignupPage extends StatelessWidget {
   const SignupPage({Key? key}) : super(key: key);
@@ -93,13 +92,9 @@ class MyAuthPageState extends State<MyAuthPage> {
               const SizedBox(height: 8),
               Text(infoText),
               OutlinedButton(
-                  onPressed: () => {
-                        Navigator.of(context)
-                            .push(MaterialPageRoute(builder: (context) {
-                          return const LoginPage();
-                        }))
-                      },
-                  child: const Text("ログイン"))
+                onPressed: () => context.go('/login'),
+                child: const Text("ログイン"),
+              )
             ],
           ),
         ),

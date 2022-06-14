@@ -1,12 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'UserState.dart';
-import 'LoginCheck.dart';
 import 'MapListPage.dart';
 
 class NewMapPage extends StatefulWidget {
+  static const routeName = '/newmap';
   const NewMapPage({Key? key}) : super(key: key);
 
   @override
@@ -26,13 +27,7 @@ class NewMapPageState extends State<NewMapPage> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 OutlinedButton(
-                    onPressed: () => {
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (context) {
-                            return const LoginCheck(
-                                nextPage: MapListPage.routeName);
-                          }))
-                        },
+                    onPressed: () => context.go('/login'),
                     child: const Text("ログイン", style: TextStyle(fontSize: 40)))
               ]),
         ),
@@ -73,11 +68,7 @@ class NewMapPageState extends State<NewMapPage> {
                         'date': date
                       });
                       if (!mounted) return;
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) {
-                          return const MapListPage();
-                        }),
-                      );
+                      context.go('/maps');
                     },
                   ),
                 )

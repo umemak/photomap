@@ -1,7 +1,11 @@
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:go_router/go_router.dart';
 
+import 'MapDetailPage.dart';
+import 'NewMapPage.dart';
+import 'NewPostPage.dart';
 import 'firebase_options.dart';
 
 import 'LoginPage.dart';
@@ -9,6 +13,7 @@ import 'UserState.dart';
 import 'MapListPage.dart';
 
 void main() async {
+  GoRouter.setUrlPathStrategy(UrlPathStrategy.path);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -16,26 +21,74 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final UserState userState = UserState();
-
   MyApp({Key? key}) : super(key: key);
+  final userState = UserState();
+  final _router = GoRouter(
+    initialLocation: '/',
+    routes: [
+      GoRoute(
+        name: 'home',
+        path: '/',
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const MapListPage(),
+        ),
+      ),
+      GoRoute(
+        name: 'login',
+        path: '/login',
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const LoginPage(),
+        ),
+      ),
+      GoRoute(
+        name: 'map list',
+        path: '/maps',
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const MapListPage(),
+        ),
+      ),
+      GoRoute(
+        name: 'new map',
+        path: '/newmap',
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const NewMapPage(),
+        ),
+      ),
+      GoRoute(
+        name: 'map detail',
+        path: '/map/detail',
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const MapDetailPage("1"),
+        ),
+      ),
+      GoRoute(
+        name: 'new post',
+        path: '/newpost',
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const NewPostPage("1"),
+        ),
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<UserState>.value(
       value: userState,
-      child: MaterialApp(
+      child: MaterialApp.router(
         // debugShowCheckedModeBanner: false,
         title: 'PhotoMap',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: MapListPage(),
-        initialRoute: '/',
-        routes: <String, WidgetBuilder>{
-          LoginPage.routeName: (BuildContext context) => const LoginPage(),
-          MapListPage.routeName: (BuildContext context) => MapListPage(),
-        },
+        routerDelegate: _router.routerDelegate,
+        routeInformationParser: _router.routeInformationParser,
       ),
     );
   }

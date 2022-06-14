@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,13 +15,14 @@ class LoginCheck extends StatefulWidget {
 }
 
 class LoginCheckState extends State<LoginCheck> {
-  void checkUser() {
+  void checkUser() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
     final userState = Provider.of<UserState>(context, listen: false);
-    if (FirebaseAuth.instance.currentUser == null) {
-      Navigator.pushReplacementNamed(context, LoginPage.routeName);
+    if (currentUser == null) {
+      context.go('/login');
     } else {
-      userState.setUser(FirebaseAuth.instance.currentUser!);
-      Navigator.pushReplacementNamed(context, widget.nextPage);
+      userState.setUser(currentUser);
+      context.go('/');
     }
   }
 

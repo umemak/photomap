@@ -1,11 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'UserState.dart';
 import 'NewMapPage.dart';
 import 'MapDetailPage.dart';
-import 'LoginCheck.dart';
 
 class MapListPage extends StatefulWidget {
   static const routeName = '/maps';
@@ -26,13 +27,7 @@ class MapListPageState extends State<MapListPage> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 OutlinedButton(
-                    onPressed: () => {
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (context) {
-                            return const LoginCheck(
-                                nextPage: MapListPage.routeName);
-                          }))
-                        },
+                    onPressed: () => context.go('/login'),
                     child: const Text("ログイン", style: TextStyle(fontSize: 40)))
               ]),
         ),
@@ -50,13 +45,7 @@ class MapListPageState extends State<MapListPage> {
                 children: <Widget>[
                   Text("${userState.user!.email}"),
                   ElevatedButton(
-                    onPressed: () => {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) {
-                          return const NewMapPage();
-                        }),
-                      ),
-                    },
+                    onPressed: () => context.go('/newmap'),
                     child: const Text("新規地図作成"),
                   ),
                 ],
@@ -80,13 +69,8 @@ class MapListPageState extends State<MapListPage> {
                             title: Text(document['title']),
                             trailing: IconButton(
                               icon: const Icon(Icons.arrow_right),
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (context) {
-                                    return MapDetailPage(document.id);
-                                  }),
-                                );
-                              },
+                              onPressed: () =>
+                                  context.go('/map/${document.id}'),
                             ),
                           ),
                         );
