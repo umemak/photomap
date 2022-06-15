@@ -60,18 +60,18 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         name: 'map detail',
-        path: '/map/detail',
+        path: '/map/:id',
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
-          child: const MapDetailPage("1"),
+          child: MapDetailPage(state.params['id']!),
         ),
       ),
       GoRoute(
         name: 'new post',
-        path: '/newpost',
+        path: '/newpost/:id',
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
-          child: const NewPostPage("1"),
+          child: NewPostPage(state.params['id']!),
         ),
       ),
     ],

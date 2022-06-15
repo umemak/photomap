@@ -45,6 +45,7 @@ class NewPostPageState extends State<NewPostPage> {
             child: Column(
               children: <Widget>[
                 Text("${userState.user?.email}"),
+                Text(widget.mapid),
                 Row(
                   children: [
                     const Text("都道府県："),
