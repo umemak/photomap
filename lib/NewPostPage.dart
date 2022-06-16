@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:html';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart';
 
 import 'UserState.dart';
 import 'MapDetailPage.dart';
@@ -24,6 +24,7 @@ class NewPostPage extends StatefulWidget {
 class NewPostPageState extends State<NewPostPage> {
   String mapTitle = "";
   String dropdownValue = '01';
+  String uploadedPhotoUrl = "";
 
   @override
   Widget build(BuildContext context) {
@@ -134,20 +135,33 @@ class NewPostPageState extends State<NewPostPage> {
                 ),
                 const SizedBox(height: 8),
                 ElevatedButton(
-                  child: const Text('画像'),
+                  child: const Text('画像選択'),
                   onPressed: () async {
-                    PickedFile? pickerFile = await ImagePicker()
+                    PickedFile? pickedFile = await ImagePicker()
                         .getImage(source: ImageSource.gallery);
-                    File file = File(pickerFile!.path);
 
                     FirebaseStorage storage = FirebaseStorage.instance;
                     try {
-                      await storage.ref("UL/upload-pic.png").putFile(file);
+                      Reference _reference = storage
+                          .ref()
+                          .child("files/${basename(pickedFile!.path)}");
+                      await _reference
+                          .putData(
+                        await pickedFile.readAsBytes(),
+                        SettableMetadata(contentType: 'image'),
+                      )
+                          .whenComplete(() async {
+                        await _reference.getDownloadURL().then((value) {
+                          uploadedPhotoUrl = value;
+                          print(value);
+                        });
+                      });
                     } catch (e) {
                       print(e);
                     }
                   },
                 ),
+                Image.network(uploadedPhotoUrl),
                 const SizedBox(height: 8),
                 TextFormField(
                   decoration: const InputDecoration(labelText: "コメント"),
