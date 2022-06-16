@@ -1,7 +1,13 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'UserState.dart';
 import 'MapDetailPage.dart';
@@ -22,16 +28,19 @@ class NewPostPageState extends State<NewPostPage> {
   @override
   Widget build(BuildContext context) {
     final UserState userState = Provider.of<UserState>(context, listen: false);
+    userState.setUser(FirebaseAuth.instance.currentUser);
     if (userState.user == null) {
       return Scaffold(
         body: Center(
           child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                OutlinedButton(
-                    onPressed: () => context.go('/login'),
-                    child: const Text("ログイン", style: TextStyle(fontSize: 40)))
-              ]),
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              OutlinedButton(
+                onPressed: () => context.go('/login'),
+                child: const Text("ログイン", style: TextStyle(fontSize: 40)),
+              )
+            ],
+          ),
         ),
       );
     } else {
@@ -117,6 +126,31 @@ class NewPostPageState extends State<NewPostPage> {
                 ),
                 TextFormField(
                   decoration: const InputDecoration(labelText: "タイトル"),
+                  onChanged: (String value) {
+                    setState(() {
+                      mapTitle = value;
+                    });
+                  },
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  child: const Text('画像'),
+                  onPressed: () async {
+                    PickedFile? pickerFile = await ImagePicker()
+                        .getImage(source: ImageSource.gallery);
+                    File file = File(pickerFile!.path);
+
+                    FirebaseStorage storage = FirebaseStorage.instance;
+                    try {
+                      await storage.ref("UL/upload-pic.png").putFile(file);
+                    } catch (e) {
+                      print(e);
+                    }
+                  },
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: "コメント"),
                   onChanged: (String value) {
                     setState(() {
                       mapTitle = value;

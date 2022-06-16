@@ -20,16 +20,19 @@ class MapListPageState extends State<MapListPage> {
   @override
   Widget build(BuildContext context) {
     final UserState userState = Provider.of<UserState>(context, listen: false);
+    userState.setUser(FirebaseAuth.instance.currentUser);
     if (userState.user == null) {
       return Scaffold(
         body: Center(
           child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                OutlinedButton(
-                    onPressed: () => context.go('/login'),
-                    child: const Text("ログイン", style: TextStyle(fontSize: 40)))
-              ]),
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              OutlinedButton(
+                onPressed: () => context.go('/login'),
+                child: const Text("ログイン", style: TextStyle(fontSize: 40)),
+              )
+            ],
+          ),
         ),
       );
     } else {
