@@ -1,12 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'UserState.dart';
-import 'NewMapPage.dart';
-import 'MapDetailPage.dart';
 
 class MapListPage extends StatefulWidget {
   static const routeName = '/maps';
@@ -20,7 +17,6 @@ class MapListPageState extends State<MapListPage> {
   @override
   Widget build(BuildContext context) {
     final UserState userState = Provider.of<UserState>(context, listen: false);
-    userState.setUser(FirebaseAuth.instance.currentUser);
     if (userState.user == null) {
       return Scaffold(
         body: Center(

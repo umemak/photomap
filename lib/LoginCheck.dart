@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'UserState.dart';
-import 'LoginPage.dart';
 
 class LoginCheck extends StatefulWidget {
   const LoginCheck({Key? key, required this.nextPage}) : super(key: key);
@@ -22,7 +21,7 @@ class LoginCheckState extends State<LoginCheck> {
       context.go('/login');
     } else {
       userState.setUser(currentUser);
-      context.go('/');
+      context.go(widget.nextPage);
     }
   }
 
