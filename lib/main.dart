@@ -18,8 +18,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  // ignore: unused_local_variable
-  final firebaseUser = await FirebaseAuth.instance.userChanges().first;
+  await FirebaseAuth.instance.userChanges().first;
   runApp(MyApp());
 }
 

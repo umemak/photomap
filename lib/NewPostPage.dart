@@ -250,11 +250,12 @@ class NewPostPageState extends State<NewPostPage> {
                       final date =
                           DateTime.now().toLocal().toIso8601String(); // 現在の日時
                       await FirebaseFirestore.instance
+                          .collection('maps')
+                          .doc(widget.mapid)
                           .collection('posts')
                           .doc() // ドキュメントID自動生成
                           .set({
                         'author': userState.user?.email,
-                        'mapId': widget.mapid,
                         'title': postTitle,
                         'prefCd': prefCd,
                         'cate00': cateCds[0],
