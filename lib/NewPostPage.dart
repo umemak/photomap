@@ -257,6 +257,7 @@ class NewPostPageState extends State<NewPostPage> {
                           .set({
                         'author': userState.user?.email,
                         'title': postTitle,
+                        'mapid': widget.mapid,
                         'prefCd': prefCd,
                         'cate00': cateCds[0],
                         'cate01': cateCds[1],

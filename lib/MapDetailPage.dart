@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:webviewx/webviewx.dart';
+import 'package:sprintf/sprintf.dart';
 
 import 'NewPostPage.dart';
 import 'UserState.dart';
@@ -65,21 +66,11 @@ class MapDetailPageState extends State<MapDetailPage> {
                       if (snapshot.connectionState == ConnectionState.done) {
                         Map<String, dynamic> data =
                             snapshot.data!.data() as Map<String, dynamic>;
-                        print(data['posts']);
                         return Center(
                           child: Column(
                             children: <Widget>[
                               Text(data['title']),
-                              WebViewX(
-                                key: const ValueKey('webviewx'),
-                                initialContent:
-                                    'http://127.0.0.1:5001/photomap-c92bb/us-central1/mapview?p01=1',
-                                initialSourceType: SourceType.url,
-                                height: 420,
-                                width: 620,
-                                onWebViewCreated: (controller) =>
-                                    webviewController = controller,
-                              ),
+                              // Text(widget.id),
                             ],
                           ),
                         );
@@ -90,43 +81,84 @@ class MapDetailPageState extends State<MapDetailPage> {
                       );
                     },
                   ),
-                  // Expanded(
-                  //   child:
-                  FutureBuilder<QuerySnapshot>(
-                    future: FirebaseFirestore.instance
-                        .collection('maps')
-                        .doc(widget.id)
-                        .collection('posts')
-                        .orderBy('date')
-                        .get(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        final List<DocumentSnapshot> documents =
-                            snapshot.data!.docs;
-                        return ListView(
-                          children: documents.map((document) {
-                            return Card(
-                              child: ListTile(
-                                title: Text(document['title']),
-                                trailing: IconButton(
-                                  icon: const Icon(Icons.arrow_right),
-                                  onPressed: () =>
-                                      context.go('/map/${document.id}'),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        );
-                      }
-                      return const Center(
-                        child: Text(""),
-                      );
-                    },
-                  ),
-                  // ),
                 ],
               ),
             ),
+            // Expanded(
+            // child:
+            FutureBuilder<QuerySnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('maps')
+                  .doc(widget.id)
+                  .collection('posts')
+                  .orderBy('date', descending: true)
+                  .get(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final List<DocumentSnapshot> documents = snapshot.data!.docs;
+                  Map<String, int> pc = {};
+                  int pp = 0;
+                  for (var d in documents) {
+                    String p = d['prefCd'];
+                    if (pc.containsKey(p)) {
+                      pc[p] = pc[p]! + 1;
+                    } else {
+                      pc[p] = 1;
+                      pp++;
+                    }
+                  }
+                  // for (var i = 0; i < documents.length; i++) {
+                  //   String p = documents[i]['prefCd'];
+                  //   if (pc.containsKey(p)) {
+                  //     pc[p] = 1;
+                  //     pp++;
+                  //   } else {
+                  //     pc[p] = pc[p]! + 1;
+                  //   }
+                  // }
+                  String url =
+                      // "http://127.0.0.1:5001/photomap-c92bb/us-central1/mapview?";
+                      "https://us-central1-photomap-c92bb.cloudfunctions.net/mapview?";
+                  pc.forEach(((key, value) => url = "$url&p$key=$value"));
+                  print(url);
+                  return Column(
+                    children: [
+                      WebViewX(
+                        key: const ValueKey('webviewx'),
+                        initialContent: url,
+                        initialSourceType: SourceType.url,
+                        height: 420,
+                        width: 620,
+                        onWebViewCreated: (controller) =>
+                            webviewController = controller,
+                      ),
+                      Text(sprintf("%d/47 達成", [pp])),
+                      Text(sprintf("投稿数：%d件", [documents.length])),
+                      ListView(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: documents.map((document) {
+                          return Card(
+                            child: ListTile(
+                              title: Text(document['title']),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.arrow_right),
+                                onPressed: () =>
+                                    context.go('/map/${document.id}'),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      )
+                    ],
+                  );
+                }
+                return const Center(
+                  child: Text(""),
+                );
+              },
+            ),
+            // ),
           ],
         ),
       ),
