@@ -34,6 +34,7 @@ class LoginPageState extends State<LoginPage> {
             children: <Widget>[
               TextFormField(
                 decoration: const InputDecoration(labelText: "メールアドレス"),
+                keyboardType: TextInputType.emailAddress,
                 onChanged: (String value) {
                   setState(() {
                     loginUserEmail = value;
