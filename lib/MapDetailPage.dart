@@ -109,28 +109,22 @@ class MapDetailPageState extends State<MapDetailPage> {
                       pp++;
                     }
                   }
-                  // for (var i = 0; i < documents.length; i++) {
-                  //   String p = documents[i]['prefCd'];
-                  //   if (pc.containsKey(p)) {
-                  //     pc[p] = 1;
-                  //     pp++;
-                  //   } else {
-                  //     pc[p] = pc[p]! + 1;
-                  //   }
-                  // }
+                  final Size size = MediaQuery.of(context).size;
+                  final double width = size.width;
+                  final double height = width * 0.5;
                   String url =
                       // "http://127.0.0.1:5001/photomap-c92bb/us-central1/mapview?";
                       "https://us-central1-photomap-c92bb.cloudfunctions.net/mapview?";
+                  url += "width=${width * 0.8}&height=${height * 0.8}";
                   pc.forEach(((key, value) => url = "$url&p$key=$value"));
-                  print(url);
                   return Column(
                     children: [
                       WebViewX(
                         key: const ValueKey('webviewx'),
                         initialContent: url,
                         initialSourceType: SourceType.url,
-                        height: 420,
-                        width: 620,
+                        height: height,
+                        width: width,
                         onWebViewCreated: (controller) =>
                             webviewController = controller,
                       ),
