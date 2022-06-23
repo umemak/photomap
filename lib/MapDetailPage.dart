@@ -35,7 +35,28 @@ class MapDetailPageState extends State<MapDetailPage> {
     final UserState userState = Provider.of<UserState>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+        ),
         title: const Text("地図詳細"),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: const [
+            DrawerHeader(child: Text("Header")),
+            ListTile(
+              title: Text("Item 1"),
+            ),
+            ListTile(
+              title: Text("Item 2"),
+            )
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go('/newpost/${widget.id}'),
@@ -111,11 +132,11 @@ class MapDetailPageState extends State<MapDetailPage> {
                   }
                   final Size size = MediaQuery.of(context).size;
                   final double width = size.width;
-                  final double height = width * 0.5;
+                  final double height = width * 0.6;
                   String url =
                       // "http://127.0.0.1:5001/photomap-c92bb/us-central1/mapview?";
                       "https://us-central1-photomap-c92bb.cloudfunctions.net/mapview?";
-                  url += "width=${width * 0.8}&height=${height * 0.8}";
+                  url += "width=${width * 0.97}&height=${height * 0.97}";
                   pc.forEach(((key, value) => url = "$url&p$key=$value"));
                   return Column(
                     children: [

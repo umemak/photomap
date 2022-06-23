@@ -151,38 +151,24 @@ class NewPostPageState extends State<NewPostPage> {
                           textAlign: TextAlign.left,
                         ),
                       ),
-                      CheckboxListTile(
-                        activeColor: Colors.blue,
-                        title: const Text('飲'),
-                        controlAffinity: ListTileControlAffinity.leading,
-                        value: cateCds[0],
-                        onChanged: (bool? newValue) {
-                          setState(() {
-                            cateCds[0] = newValue!;
-                          });
-                        },
-                      ),
-                      CheckboxListTile(
-                        activeColor: Colors.blue,
-                        title: const Text('食'),
-                        controlAffinity: ListTileControlAffinity.leading,
-                        value: cateCds[1],
-                        onChanged: (bool? newValue) {
-                          setState(() {
-                            cateCds[1] = newValue!;
-                          });
-                        },
-                      ),
-                      CheckboxListTile(
-                        activeColor: Colors.blue,
-                        title: const Text('酒'),
-                        controlAffinity: ListTileControlAffinity.leading,
-                        value: cateCds[2],
-                        onChanged: (bool? newValue) {
-                          setState(() {
-                            cateCds[2] = newValue!;
-                          });
-                        },
+                      Container(
+                        color: Colors.white,
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Wrap(
+                              spacing: 5.0,
+                              runSpacing: 5.0,
+                              children: [
+                                createChoiceChip(context, "飲", 0),
+                                createChoiceChip(context, "食", 1),
+                                createChoiceChip(context, "酒", 2),
+                                // : （省略）
+                              ],
+                            )
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -235,6 +221,7 @@ class NewPostPageState extends State<NewPostPage> {
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
+                    maxLines: 4,
                     decoration: const InputDecoration(labelText: "コメント"),
                     onChanged: (String value) {
                       setState(() {
@@ -278,6 +265,24 @@ class NewPostPageState extends State<NewPostPage> {
           ),
         ),
       ),
+    );
+  }
+
+  ChoiceChip createChoiceChip(BuildContext context, String label, int index) {
+    return ChoiceChip(
+      avatar: cateCds[index]
+          ? const Icon(Icons.check_box_outlined)
+          : const Icon(Icons.check_box_outline_blank),
+      label: Text(label),
+      selected: cateCds[index],
+      onSelected: (value) {
+        setState(() {
+          cateCds[index] = value;
+        });
+      },
+      selectedColor: Colors.blueAccent,
+      labelStyle:
+          TextStyle(color: cateCds[index] ? Colors.white : Colors.black),
     );
   }
 }
