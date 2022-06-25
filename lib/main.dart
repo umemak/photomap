@@ -78,24 +78,16 @@ class MyApp extends StatelessWidget {
       ),
     ],
     redirect: (GoRouterState state) {
-      // if the user is not logged in, they need to login
       final bool loggedIn = (userState.user != null);
       final bool loggingIn = state.subloc == '/login';
       if (!loggedIn) {
         return loggingIn ? null : '/login';
       }
-
-      // if the user is logged in but still on the login page, send them to
-      // the home page
       if (loggingIn) {
         return '/';
       }
-
-      // no need to redirect at all
       return null;
     },
-
-    // changes on the listenable will cause the router to refresh it's route
     refreshListenable: userState,
   );
 
@@ -104,7 +96,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider<UserState>.value(
       value: userState,
       child: MaterialApp.router(
-        // debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: false,
         title: 'PhotoMap',
         theme: ThemeData(
           primarySwatch: Colors.blue,

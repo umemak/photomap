@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
@@ -13,7 +12,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart';
 
 import 'UserState.dart';
-import 'MapDetailPage.dart';
 
 class NewPostModel extends ChangeNotifier {
   String imageURL = "";
@@ -61,6 +59,16 @@ class NewPostPageState extends State<NewPostPage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text("新規投稿"),
+          actions: [
+            IconButton(
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                userState.setUser(null);
+              },
+              icon: const Icon(Icons.logout),
+            ),
+            const SizedBox(width: 16),
+          ],
         ),
         body: SingleChildScrollView(
           child: Center(

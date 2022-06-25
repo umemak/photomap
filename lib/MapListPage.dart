@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'UserState.dart';
 
@@ -20,6 +21,16 @@ class MapListPageState extends State<MapListPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("地図一覧"),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              userState.setUser(null);
+            },
+            icon: const Icon(Icons.logout),
+          ),
+          const SizedBox(width: 16),
+        ],
       ),
       body: Column(
         children: [
