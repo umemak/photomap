@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:webviewx/webviewx.dart';
@@ -182,37 +181,70 @@ class MapDetailPageState extends State<MapDetailPage> {
       cateCd03 = false,
       Timestamp? createdAt,
       String postId = ""}) {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
-        boxShadow: const [
-          BoxShadow(color: Colors.grey, blurRadius: 3),
-        ],
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 100,
-            height: 100,
-            child: imageWidget(url),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: SizedBox(
+    return GestureDetector(
+      onTap: () async {
+        var result = await showModalBottomSheet<int>(
+          context: context,
+          builder: (BuildContext context) {
+            return Column(mainAxisSize: MainAxisSize.min, children: [
+              Row(
+                children: [
+                  SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: imageWidget(url),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SizedBox(
+                      height: 100,
+                      child: mainContent(
+                          title: title,
+                          prefCd: prefCd,
+                          cateCd01: cateCd01,
+                          cateCd02: cateCd02,
+                          cateCd03: cateCd03,
+                          createdAt: createdAt),
+                    ),
+                  ),
+                ],
+              ),
+            ]);
+          },
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+          boxShadow: const [
+            BoxShadow(color: Colors.grey, blurRadius: 3),
+          ],
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 100,
               height: 100,
-              child: mainContent(
-                  title: title,
-                  prefCd: prefCd,
-                  cateCd01: cateCd01,
-                  cateCd02: cateCd02,
-                  cateCd03: cateCd03,
-                  createdAt: createdAt),
+              child: imageWidget(url),
             ),
-          ),
-        ],
+            const SizedBox(width: 8),
+            Expanded(
+              child: SizedBox(
+                height: 100,
+                child: mainContent(
+                    title: title,
+                    prefCd: prefCd,
+                    cateCd01: cateCd01,
+                    cateCd02: cateCd02,
+                    cateCd03: cateCd03,
+                    createdAt: createdAt),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
