@@ -243,8 +243,6 @@ class NewPostPageState extends State<NewPostPage> {
                     child: ElevatedButton(
                       child: const Text('作成'),
                       onPressed: () async {
-                        final date =
-                            DateTime.now().toLocal().toIso8601String(); // 現在の日時
                         await FirebaseFirestore.instance
                             .collection('maps')
                             .doc(widget.mapid)
@@ -260,7 +258,7 @@ class NewPostPageState extends State<NewPostPage> {
                           'cate02': cateCds[2],
                           'comment': comment,
                           'imageURL': imageURL,
-                          'date': date
+                          'date': FieldValue.serverTimestamp()
                         });
                         if (!mounted) return;
                         context.go('/map/${widget.mapid}');

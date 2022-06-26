@@ -1,16 +1,17 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:webviewx/webviewx.dart';
 import 'package:sprintf/sprintf.dart';
 import 'package:crop_your_image/crop_your_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import "package:intl/intl.dart";
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'UserState.dart';
+import 'pref_codes.dart';
 
 class MapDetailPage extends StatefulWidget {
   static const routeName = '/map';
@@ -145,15 +146,15 @@ class MapDetailPageState extends State<MapDetailPage> {
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           children: documents.map((document) {
-                            return Card(
-                              child: ListTile(
-                                title: Text(document['title']),
-                                trailing: IconButton(
-                                  icon: const Icon(Icons.arrow_right),
-                                  onPressed: () =>
-                                      context.go('/map/${document.id}'),
-                                ),
-                              ),
+                            return listItemBuilder(
+                              title: document['title'],
+                              url: document['imageURL'],
+                              prefCd: document['prefCd'],
+                              cateCd01: document['cate00'],
+                              cateCd02: document['cate01'],
+                              cateCd03: document['cate02'],
+                              createdAt: document['date'],
+                              postId: document.id,
                             );
                           }).toList(),
                         )
@@ -167,6 +168,117 @@ class MapDetailPageState extends State<MapDetailPage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget listItemBuilder(
+      {String title = "",
+      String url = "",
+      String prefCd = "",
+      cateCd01 = false,
+      cateCd02 = false,
+      cateCd03 = false,
+      Timestamp? createdAt,
+      String postId = ""}) {
+    return Container(
+      margin: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        boxShadow: const [
+          BoxShadow(color: Colors.grey, blurRadius: 3),
+        ],
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 100,
+            height: 100,
+            child: imageWidget(url),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: SizedBox(
+              height: 100,
+              child: mainContent(
+                  title: title,
+                  prefCd: prefCd,
+                  cateCd01: cateCd01,
+                  cateCd02: cateCd02,
+                  cateCd03: cateCd03,
+                  createdAt: createdAt),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget imageWidget(String url) {
+    Image img = Image.asset('assets/no_image_square.jpg');
+    if (url != "") {
+      img = Image.network(url);
+    }
+    return ClipRect(
+      child: FittedBox(
+        fit: BoxFit.cover,
+        child: img,
+      ),
+    );
+  }
+
+  Widget mainContent({
+    String title = "",
+    String prefCd = "",
+    cateCd01 = false,
+    cateCd02 = false,
+    cateCd03 = false,
+    Timestamp? createdAt,
+  }) {
+    initializeDateFormatting("ja_JP");
+    DateTime datetime = createdAt!.toDate();
+    var formatter = DateFormat('yyyy/MM/dd(E) HH:mm', "ja_JP");
+    var formatted = formatter.format(datetime);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 4),
+        Text(PrefCodes.cdToName(prefCd)),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            tagText(text: "飲", enabled: cateCd01),
+            const SizedBox(width: 8),
+            tagText(text: "食", enabled: cateCd02),
+            const SizedBox(width: 8),
+            tagText(text: "酒", enabled: cateCd03),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          formatted,
+          textAlign: TextAlign.right,
+        ),
+      ],
+    );
+  }
+
+  Widget tagText({String text = "", bool enabled = false}) {
+    return Container(
+      color: enabled ? Colors.blue : Colors.grey,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: enabled ? Colors.white : Colors.black,
         ),
       ),
     );
