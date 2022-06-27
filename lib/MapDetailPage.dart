@@ -11,6 +11,7 @@ import 'package:intl/date_symbol_data_local.dart';
 
 import 'UserState.dart';
 import 'pref_codes.dart';
+import 'models/post_model.dart';
 
 class MapDetailPage extends StatefulWidget {
   static const routeName = '/map';
@@ -24,6 +25,7 @@ class MapDetailPage extends StatefulWidget {
 class MapDetailPageState extends State<MapDetailPage> {
   late WebViewXController webviewController;
   final _cropController = CropController();
+
   @override
   void dispose() {
     webviewController.dispose();
@@ -103,7 +105,7 @@ class MapDetailPageState extends State<MapDetailPage> {
                     .collection('maps')
                     .doc(widget.id)
                     .collection('posts')
-                    .orderBy('date', descending: true)
+                    .orderBy('createdAt', descending: true)
                     .get(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
@@ -141,22 +143,6 @@ class MapDetailPageState extends State<MapDetailPage> {
                         ),
                         Text(sprintf("%d/47 達成", [pp])),
                         Text(sprintf("投稿数：%d件", [documents.length])),
-                        ListView(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          children: documents.map((document) {
-                            return listItemBuilder(
-                              title: document['title'],
-                              url: document['imageURL'],
-                              prefCd: document['prefCd'],
-                              cateCd01: document['cate00'],
-                              cateCd02: document['cate01'],
-                              cateCd03: document['cate02'],
-                              createdAt: document['date'],
-                              postId: document.id,
-                            );
-                          }).toList(),
-                        )
                       ],
                     );
                   }
@@ -165,6 +151,21 @@ class MapDetailPageState extends State<MapDetailPage> {
                   );
                 },
               ),
+              ChangeNotifierProvider(
+                create: (_) => PostsModel()..getPosts(widget.id),
+                child: Consumer<PostsModel>(
+                  builder: (context, model, child) {
+                    final posts = model.posts;
+                    return ListView(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: posts.map((post) {
+                        return listItemBuilder(post: post);
+                      }).toList(),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         ),
@@ -172,44 +173,33 @@ class MapDetailPageState extends State<MapDetailPage> {
     );
   }
 
-  Widget listItemBuilder(
-      {String title = "",
-      String url = "",
-      String prefCd = "",
-      cateCd01 = false,
-      cateCd02 = false,
-      cateCd03 = false,
-      Timestamp? createdAt,
-      String postId = ""}) {
+  Widget listItemBuilder({
+    required PostModel post,
+  }) {
     return GestureDetector(
       onTap: () async {
         var result = await showModalBottomSheet<int>(
           context: context,
           builder: (BuildContext context) {
-            return Column(mainAxisSize: MainAxisSize.min, children: [
-              Row(
-                children: [
-                  SizedBox(
-                    width: 100,
-                    height: 100,
-                    child: imageWidget(url),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: SizedBox(
-                      height: 100,
-                      child: mainContent(
-                          title: title,
-                          prefCd: prefCd,
-                          cateCd01: cateCd01,
-                          cateCd02: cateCd02,
-                          cateCd03: cateCd03,
-                          createdAt: createdAt),
-                    ),
-                  ),
-                ],
-              ),
-            ]);
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(post.title),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: 400,
+                  height: 400,
+                  child: imageWidget(post.imageURL),
+                ),
+                const SizedBox(height: 8),
+                IconButton(
+                    onPressed: () => {},
+                    icon: Icon(
+                      Icons.favorite_outline,
+                      color: Colors.pink,
+                    )),
+              ],
+            );
           },
         );
       },
@@ -228,19 +218,15 @@ class MapDetailPageState extends State<MapDetailPage> {
             SizedBox(
               width: 100,
               height: 100,
-              child: imageWidget(url),
+              child: imageWidget(post.imageURL),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: SizedBox(
                 height: 100,
                 child: mainContent(
-                    title: title,
-                    prefCd: prefCd,
-                    cateCd01: cateCd01,
-                    cateCd02: cateCd02,
-                    cateCd03: cateCd03,
-                    createdAt: createdAt),
+                  post: post,
+                ),
               ),
             ),
           ],
@@ -263,15 +249,10 @@ class MapDetailPageState extends State<MapDetailPage> {
   }
 
   Widget mainContent({
-    String title = "",
-    String prefCd = "",
-    cateCd01 = false,
-    cateCd02 = false,
-    cateCd03 = false,
-    Timestamp? createdAt,
+    required PostModel post,
   }) {
     initializeDateFormatting("ja_JP");
-    DateTime datetime = createdAt!.toDate();
+    DateTime datetime = post.createdAt.toDate();
     var formatter = DateFormat('yyyy/MM/dd(E) HH:mm', "ja_JP");
     var formatted = formatter.format(datetime);
     return Column(
@@ -279,19 +260,19 @@ class MapDetailPageState extends State<MapDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          title,
+          post.title,
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
-        Text(PrefCodes.cdToName(prefCd)),
+        Text(PrefCodes.cdToName(post.prefCd)),
         const SizedBox(height: 4),
         Row(
           children: [
-            tagText(text: "飲", enabled: cateCd01),
+            tagText(text: "飲", enabled: post.cate00),
             const SizedBox(width: 8),
-            tagText(text: "食", enabled: cateCd02),
+            tagText(text: "食", enabled: post.cate01),
             const SizedBox(width: 8),
-            tagText(text: "酒", enabled: cateCd03),
+            tagText(text: "酒", enabled: post.cate02),
           ],
         ),
         const SizedBox(height: 4),

@@ -251,14 +251,14 @@ class NewPostPageState extends State<NewPostPage> {
                             .set({
                           'author': userState.user?.email,
                           'title': postTitle,
-                          'mapid': widget.mapid,
+                          'mapID': widget.mapid,
                           'prefCd': prefCd,
                           'cate00': cateCds[0],
                           'cate01': cateCds[1],
                           'cate02': cateCds[2],
                           'comment': comment,
                           'imageURL': imageURL,
-                          'date': FieldValue.serverTimestamp()
+                          'createdAt': FieldValue.serverTimestamp()
                         });
                         if (!mounted) return;
                         context.go('/map/${widget.mapid}');
