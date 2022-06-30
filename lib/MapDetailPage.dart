@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:webviewx/webviewx.dart';
 import 'package:sprintf/sprintf.dart';
-import 'package:crop_your_image/crop_your_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import "package:intl/intl.dart";
 import 'package:intl/date_symbol_data_local.dart';
@@ -24,7 +23,6 @@ class MapDetailPage extends StatefulWidget {
 
 class MapDetailPageState extends State<MapDetailPage> {
   late WebViewXController webviewController;
-  final _cropController = CropController();
 
   @override
   void dispose() {
