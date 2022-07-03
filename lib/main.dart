@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'MapDetailPage.dart';
 import 'NewMapPage.dart';
@@ -99,11 +98,6 @@ class MyApp extends StatelessWidget {
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         title: 'PhotoMap',
-        theme: ThemeData(
-          textTheme:
-              GoogleFonts.sawarabiGothicTextTheme(Theme.of(context).textTheme),
-          primarySwatch: Colors.blue,
-        ),
         routerDelegate: _router.routerDelegate,
         routeInformationParser: _router.routeInformationParser,
       ),

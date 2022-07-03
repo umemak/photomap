@@ -192,7 +192,7 @@ class MapDetailPageState extends State<MapDetailPage> {
                 const SizedBox(height: 8),
                 IconButton(
                     onPressed: () => {},
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.favorite_outline,
                       color: Colors.pink,
                     )),
@@ -216,7 +216,7 @@ class MapDetailPageState extends State<MapDetailPage> {
             SizedBox(
               width: 100,
               height: 100,
-              child: imageWidget(post.imageURL),
+              child: imageWidget(post.thumbnailURL),
             ),
             const SizedBox(width: 8),
             Expanded(

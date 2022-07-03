@@ -10,6 +10,7 @@ class PostModel {
   String comment;
   Timestamp createdAt;
   String imageURL;
+  String thumbnailURL;
   String mapID;
   String prefCd;
   String title;
@@ -23,6 +24,7 @@ class PostModel {
     this.comment,
     this.createdAt,
     this.imageURL,
+    this.thumbnailURL,
     this.mapID,
     this.prefCd,
     this.title,
@@ -49,6 +51,7 @@ class PostsModel extends ChangeNotifier {
               doc['comment'],
               doc['createdAt'],
               doc['imageURL'],
+              doc['thumbnailURL'],
               doc['mapID'],
               doc['prefCd'],
               doc['title'],

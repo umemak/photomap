@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart';
-import 'package:crop/crop.dart';
+import 'package:image/image.dart' as ximage;
 
 import 'UserState.dart';
 
@@ -31,12 +31,9 @@ class NewPostPageState extends State<NewPostPage> {
   String uploadedPhotoUrl = "";
   String comment = "";
   String imageURL = "";
+  String thumbnailURL = "";
   String imagePath = "";
   Uint8List imageData = Uint8List(0);
-
-  final controller = CropController(aspectRatio: 1000 / 667.0);
-  double _rotation = 0;
-  BoxShape shape = BoxShape.rectangle;
 
   @override
   Widget build(BuildContext context) {
@@ -80,57 +77,7 @@ class NewPostPageState extends State<NewPostPage> {
                           prefCd = newValue!;
                         });
                       },
-                      items: const [
-                        DropdownMenuItem(
-                            value: '00', child: Text('--選択してください--')),
-                        DropdownMenuItem(value: '01', child: Text('北海道')),
-                        DropdownMenuItem(value: '02', child: Text('青森')),
-                        DropdownMenuItem(value: '03', child: Text('岩手')),
-                        DropdownMenuItem(value: '04', child: Text('宮城')),
-                        DropdownMenuItem(value: '05', child: Text('秋田')),
-                        DropdownMenuItem(value: '06', child: Text('山形')),
-                        DropdownMenuItem(value: '07', child: Text('福島')),
-                        DropdownMenuItem(value: '08', child: Text('茨城')),
-                        DropdownMenuItem(value: '09', child: Text('栃木')),
-                        DropdownMenuItem(value: '10', child: Text('群馬')),
-                        DropdownMenuItem(value: '11', child: Text('埼玉')),
-                        DropdownMenuItem(value: '12', child: Text('千葉')),
-                        DropdownMenuItem(value: '13', child: Text('東京')),
-                        DropdownMenuItem(value: '14', child: Text('神奈川')),
-                        DropdownMenuItem(value: '15', child: Text('新潟')),
-                        DropdownMenuItem(value: '16', child: Text('富山')),
-                        DropdownMenuItem(value: '17', child: Text('石川')),
-                        DropdownMenuItem(value: '18', child: Text('福井')),
-                        DropdownMenuItem(value: '19', child: Text('山梨')),
-                        DropdownMenuItem(value: '20', child: Text('長野')),
-                        DropdownMenuItem(value: '21', child: Text('岐阜')),
-                        DropdownMenuItem(value: '22', child: Text('静岡')),
-                        DropdownMenuItem(value: '23', child: Text('愛知')),
-                        DropdownMenuItem(value: '24', child: Text('三重')),
-                        DropdownMenuItem(value: '25', child: Text('滋賀')),
-                        DropdownMenuItem(value: '26', child: Text('京都')),
-                        DropdownMenuItem(value: '27', child: Text('大阪')),
-                        DropdownMenuItem(value: '28', child: Text('兵庫')),
-                        DropdownMenuItem(value: '29', child: Text('奈良')),
-                        DropdownMenuItem(value: '30', child: Text('和歌山')),
-                        DropdownMenuItem(value: '31', child: Text('鳥取')),
-                        DropdownMenuItem(value: '32', child: Text('島根')),
-                        DropdownMenuItem(value: '33', child: Text('岡山')),
-                        DropdownMenuItem(value: '34', child: Text('広島')),
-                        DropdownMenuItem(value: '35', child: Text('山口')),
-                        DropdownMenuItem(value: '36', child: Text('徳島')),
-                        DropdownMenuItem(value: '37', child: Text('香川')),
-                        DropdownMenuItem(value: '38', child: Text('愛媛')),
-                        DropdownMenuItem(value: '39', child: Text('高知')),
-                        DropdownMenuItem(value: '40', child: Text('福岡')),
-                        DropdownMenuItem(value: '41', child: Text('佐賀')),
-                        DropdownMenuItem(value: '42', child: Text('長崎')),
-                        DropdownMenuItem(value: '43', child: Text('熊本')),
-                        DropdownMenuItem(value: '44', child: Text('大分')),
-                        DropdownMenuItem(value: '45', child: Text('宮崎')),
-                        DropdownMenuItem(value: '46', child: Text('鹿児島')),
-                        DropdownMenuItem(value: '47', child: Text('沖縄')),
-                      ],
+                      items: prefDropdownMenuItems(),
                     ),
                   ],
                 ),
@@ -229,6 +176,30 @@ class NewPostPageState extends State<NewPostPage> {
                   child: ElevatedButton(
                     child: const Text('作成'),
                     onPressed: () async {
+                      // thumbnail
+                      final FirebaseStorage storage = FirebaseStorage.instance;
+                      final referencetn = storage
+                          .ref()
+                          .child("files/tn/${basename(imagePath)}");
+                      final tnData = ximage.encodePng(ximage.copyResize(
+                          ximage.decodeImage(imageData)!,
+                          width: 100));
+                      await referencetn
+                          .putData(
+                        Uint8List.fromList(tnData),
+                        SettableMetadata(contentType: 'image'),
+                      )
+                          .whenComplete(() async {
+                        await referencetn.getDownloadURL().then((value) {
+                          setState(() {
+                            thumbnailURL = value;
+                          });
+                          if (kDebugMode) {
+                            print(value);
+                          }
+                        });
+                      });
+
                       await FirebaseFirestore.instance
                           .collection('maps')
                           .doc(widget.mapid)
@@ -244,6 +215,7 @@ class NewPostPageState extends State<NewPostPage> {
                         'cate02': cateCds[2],
                         'comment': comment,
                         'imageURL': imageURL,
+                        'thumbnailURL': thumbnailURL,
                         'createdAt': FieldValue.serverTimestamp()
                       });
                       if (!mounted) return;
@@ -285,140 +257,59 @@ class NewPostPageState extends State<NewPostPage> {
         imageData,
         height: 300,
       );
-      // return Column(
-      //   children: <Widget>[
-      //     Expanded(
-      //       child: Container(
-      //         color: Colors.black,
-      //         padding: const EdgeInsets.all(8),
-      //         child: Crop(
-      //           onChanged: (decomposition) {
-      //             if (_rotation != decomposition.rotation) {
-      //               setState(() {
-      //                 _rotation = ((decomposition.rotation + 180) % 360) - 180;
-      //               });
-      //             }
-
-      //             // print(
-      //             //     "Scale : ${decomposition.scale}, Rotation: ${decomposition.rotation}, translation: ${decomposition.translation}");
-      //           },
-      //           controller: controller,
-      //           shape: shape,
-      //           foreground: IgnorePointer(
-      //             child: Container(
-      //               alignment: Alignment.bottomRight,
-      //               child: const Text(
-      //                 'Foreground Object',
-      //                 style: TextStyle(color: Colors.red),
-      //               ),
-      //             ),
-      //           ),
-      //           helper: shape == BoxShape.rectangle
-      //               ? Container(
-      //                   decoration: BoxDecoration(
-      //                     border: Border.all(color: Colors.white, width: 2),
-      //                   ),
-      //                 )
-      //               : null,
-      //           child: Image.memory(
-      //             imageData,
-      //             fit: BoxFit.cover,
-      //           ),
-      //         ),
-      //       ),
-      //     ),
-      //     Row(
-      //       children: <Widget>[
-      //         IconButton(
-      //           icon: const Icon(Icons.undo),
-      //           tooltip: 'Undo',
-      //           onPressed: () {
-      //             controller.rotation = 0;
-      //             controller.scale = 1;
-      //             controller.offset = Offset.zero;
-      //             setState(() {
-      //               _rotation = 0;
-      //             });
-      //           },
-      //         ),
-      //         // Expanded(
-      //         //   child: SliderTheme(
-      //         //     data: theme.sliderTheme.copyWith(
-      //         //       trackShape: CenteredRectangularSliderTrackShape(),
-      //         //     ),
-      //         //     child: Slider(
-      //         //       divisions: 360,
-      //         //       value: _rotation,
-      //         //       min: -180,
-      //         //       max: 180,
-      //         //       label: '$_rotation°',
-      //         //       onChanged: (n) {
-      //         //         setState(() {
-      //         //           _rotation = n.roundToDouble();
-      //         //           controller.rotation = _rotation;
-      //         //         });
-      //         //       },
-      //         //     ),
-      //         //   ),
-      //         // ),
-      //         PopupMenuButton<BoxShape>(
-      //           icon: const Icon(Icons.crop_free),
-      //           itemBuilder: (context) => [
-      //             const PopupMenuItem(
-      //               value: BoxShape.rectangle,
-      //               child: Text("Box"),
-      //             ),
-      //             const PopupMenuItem(
-      //               value: BoxShape.circle,
-      //               child: Text("Oval"),
-      //             ),
-      //           ],
-      //           tooltip: 'Crop Shape',
-      //           onSelected: (x) {
-      //             setState(() {
-      //               shape = x;
-      //             });
-      //           },
-      //         ),
-      //         PopupMenuButton<double>(
-      //           icon: const Icon(Icons.aspect_ratio),
-      //           itemBuilder: (context) => [
-      //             const PopupMenuItem(
-      //               value: 1000 / 667.0,
-      //               child: Text("Original"),
-      //             ),
-      //             const PopupMenuDivider(),
-      //             const PopupMenuItem(
-      //               value: 16.0 / 9.0,
-      //               child: Text("16:9"),
-      //             ),
-      //             const PopupMenuItem(
-      //               value: 4.0 / 3.0,
-      //               child: Text("4:3"),
-      //             ),
-      //             const PopupMenuItem(
-      //               value: 1,
-      //               child: Text("1:1"),
-      //             ),
-      //             const PopupMenuItem(
-      //               value: 3.0 / 4.0,
-      //               child: Text("3:4"),
-      //             ),
-      //             const PopupMenuItem(
-      //               value: 9.0 / 16.0,
-      //               child: Text("9:16"),
-      //             ),
-      //           ],
-      //           tooltip: 'Aspect Ratio',
-      //           onSelected: (x) {
-      //             controller.aspectRatio = x;
-      //             setState(() {});
-      //           },
-      //         ),
-      //       ],
-      //     ),
-      //   ],
-      // );
     }
+  }
+
+  List<DropdownMenuItem<String>>? prefDropdownMenuItems() {
+    return const [
+      DropdownMenuItem(value: '00', child: Text('--選択してください--')),
+      DropdownMenuItem(value: '01', child: Text('北海道')),
+      DropdownMenuItem(value: '02', child: Text('青森')),
+      DropdownMenuItem(value: '03', child: Text('岩手')),
+      DropdownMenuItem(value: '04', child: Text('宮城')),
+      DropdownMenuItem(value: '05', child: Text('秋田')),
+      DropdownMenuItem(value: '06', child: Text('山形')),
+      DropdownMenuItem(value: '07', child: Text('福島')),
+      DropdownMenuItem(value: '08', child: Text('茨城')),
+      DropdownMenuItem(value: '09', child: Text('栃木')),
+      DropdownMenuItem(value: '10', child: Text('群馬')),
+      DropdownMenuItem(value: '11', child: Text('埼玉')),
+      DropdownMenuItem(value: '12', child: Text('千葉')),
+      DropdownMenuItem(value: '13', child: Text('東京')),
+      DropdownMenuItem(value: '14', child: Text('神奈川')),
+      DropdownMenuItem(value: '15', child: Text('新潟')),
+      DropdownMenuItem(value: '16', child: Text('富山')),
+      DropdownMenuItem(value: '17', child: Text('石川')),
+      DropdownMenuItem(value: '18', child: Text('福井')),
+      DropdownMenuItem(value: '19', child: Text('山梨')),
+      DropdownMenuItem(value: '20', child: Text('長野')),
+      DropdownMenuItem(value: '21', child: Text('岐阜')),
+      DropdownMenuItem(value: '22', child: Text('静岡')),
+      DropdownMenuItem(value: '23', child: Text('愛知')),
+      DropdownMenuItem(value: '24', child: Text('三重')),
+      DropdownMenuItem(value: '25', child: Text('滋賀')),
+      DropdownMenuItem(value: '26', child: Text('京都')),
+      DropdownMenuItem(value: '27', child: Text('大阪')),
+      DropdownMenuItem(value: '28', child: Text('兵庫')),
+      DropdownMenuItem(value: '29', child: Text('奈良')),
+      DropdownMenuItem(value: '30', child: Text('和歌山')),
+      DropdownMenuItem(value: '31', child: Text('鳥取')),
+      DropdownMenuItem(value: '32', child: Text('島根')),
+      DropdownMenuItem(value: '33', child: Text('岡山')),
+      DropdownMenuItem(value: '34', child: Text('広島')),
+      DropdownMenuItem(value: '35', child: Text('山口')),
+      DropdownMenuItem(value: '36', child: Text('徳島')),
+      DropdownMenuItem(value: '37', child: Text('香川')),
+      DropdownMenuItem(value: '38', child: Text('愛媛')),
+      DropdownMenuItem(value: '39', child: Text('高知')),
+      DropdownMenuItem(value: '40', child: Text('福岡')),
+      DropdownMenuItem(value: '41', child: Text('佐賀')),
+      DropdownMenuItem(value: '42', child: Text('長崎')),
+      DropdownMenuItem(value: '43', child: Text('熊本')),
+      DropdownMenuItem(value: '44', child: Text('大分')),
+      DropdownMenuItem(value: '45', child: Text('宮崎')),
+      DropdownMenuItem(value: '46', child: Text('鹿児島')),
+      DropdownMenuItem(value: '47', child: Text('沖縄')),
+    ];
   }
 }
