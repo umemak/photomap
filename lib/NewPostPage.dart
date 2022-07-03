@@ -12,6 +12,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart';
 import 'package:image/image.dart' as ximage;
+import 'package:image_cropper/image_cropper.dart';
+import 'cropper/ui_helper.dart'
+    if (dart.library.io) 'cropper/mobile_ui_helper.dart'
+    if (dart.library.html) 'cropper/web_ui_helper.dart';
 
 import 'UserState.dart';
 
@@ -128,33 +132,49 @@ class NewPostPageState extends State<NewPostPage> {
                     XFile? pickedFile = await ImagePicker()
                         .pickImage(source: ImageSource.gallery);
                     if (pickedFile != null) {
-                      final FirebaseStorage storage = FirebaseStorage.instance;
-                      final Uint8List imgdata = await pickedFile.readAsBytes();
-                      setState(() {
-                        imagePath = pickedFile.path;
-                        imageData = imgdata;
-                      });
-                      try {
-                        final reference =
-                            storage.ref().child("files/${basename(imagePath)}");
-                        await reference
-                            .putData(
-                          imageData,
-                          SettableMetadata(contentType: 'image'),
-                        )
-                            .whenComplete(() async {
-                          await reference.getDownloadURL().then((value) {
-                            setState(() {
-                              imageURL = value;
-                            });
-                            if (kDebugMode) {
-                              print(value);
-                            }
-                          });
+                      CroppedFile? croppedFile = await ImageCropper().cropImage(
+                        sourcePath: pickedFile.path,
+                        aspectRatioPresets: [
+                          CropAspectRatioPreset.square,
+                          CropAspectRatioPreset.ratio3x2,
+                          CropAspectRatioPreset.original,
+                          CropAspectRatioPreset.ratio4x3,
+                          CropAspectRatioPreset.ratio16x9
+                        ],
+                        uiSettings: buildUiSettings(context),
+                      );
+                      if (croppedFile != null) {
+                        final FirebaseStorage storage =
+                            FirebaseStorage.instance;
+                        final Uint8List imgdata =
+                            await croppedFile.readAsBytes();
+                        setState(() {
+                          imagePath = pickedFile.path;
+                          imageData = imgdata;
                         });
-                      } catch (e) {
-                        if (kDebugMode) {
-                          print(e);
+                        try {
+                          final reference = storage
+                              .ref()
+                              .child("files/${basename(imagePath)}");
+                          await reference
+                              .putData(
+                            imageData,
+                            SettableMetadata(contentType: 'image'),
+                          )
+                              .whenComplete(() async {
+                            await reference.getDownloadURL().then((value) {
+                              setState(() {
+                                imageURL = value;
+                              });
+                              if (kDebugMode) {
+                                print(value);
+                              }
+                            });
+                          });
+                        } catch (e) {
+                          if (kDebugMode) {
+                            print(e);
+                          }
                         }
                       }
                     }
